@@ -50,3 +50,11 @@ export async function redirectToLink (
     })
 }
 
+export async function getLinkByCode (code) {
+    const result = await query(
+        `SELECT * FROM links WHERE code = $1`,[code]
+    );
+
+    return result.rows[0] || null
+}
+
