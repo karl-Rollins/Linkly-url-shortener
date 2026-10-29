@@ -3,6 +3,7 @@ import { createLink } from "../services/linkService.js";
 import { redirectToLink } from "../services/linkService.js";
 import { getLinkByCode } from "../services/linkService.js";
 import { getClicksByCode } from "../services/linkService.js";
+import { deleteLink } from "../services/linkService.js";
 
 export async function linkController (req, res, next) {
     try {
@@ -72,6 +73,24 @@ export async function getClicksController (req, res, next) {
 
         return res.json(clicks)
 
+    } catch (error) {
+        next(error)
+    }
+}
+
+export async function deleteLinkController (req, res, next) {
+    try {
+        const { code } = req.params
+
+        const deleted = await deleteLink(code)
+
+        if (!deleted) {
+            return res.status(404).json({
+                error: "link not found"
+            })
+        }
+
+        return res.status(204).send()
     } catch (error) {
         next(error)
     }

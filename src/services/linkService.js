@@ -77,3 +77,16 @@ export async function getClicksByCode (code) {
 
     return result.rows;
 }
+
+export async function deleteLink (code) {
+    const result = await query(
+        `
+        DELETE FROM links
+        WHERE code = $1
+        RETURNING id
+        `,
+        [code]
+    );
+
+    return result.rowCount > 0
+}
