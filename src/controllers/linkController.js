@@ -2,6 +2,7 @@ import { linkSchema } from "../schemas/linkSchema.js";
 import { createLink } from "../services/linkService.js";
 import { redirectToLink } from "../services/linkService.js";
 import { getLinkByCode } from "../services/linkService.js";
+import { getClicksByCode } from "../services/linkService.js";
 
 export async function linkController (req, res, next) {
     try {
@@ -51,7 +52,26 @@ export async function getLinkController (req, res, next) {
         }
 
         return res.json(link)
-        
+
+    } catch (error) {
+        next(error)
+    }
+}
+
+export async function getClicksController (req, res, next) {
+    try {
+        const { code } = req.params
+
+        const clicks = await getClicksByCode(code)
+
+        if (!clicks) {
+            return res.status(404).json({
+                error: "click not found",
+            })
+        }
+
+        return res.json(clicks)
+
     } catch (error) {
         next(error)
     }

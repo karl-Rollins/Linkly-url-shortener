@@ -58,3 +58,22 @@ export async function getLinkByCode (code) {
     return result.rows[0] || null
 }
 
+export async function getClicksByCode (code) {
+    const result = await query(
+        `
+        SELECT
+        c.id,
+        c.referrer,
+        c.user_agent,
+        c.clicked_at
+        FROM clicks c
+        JOIN links l
+        ON c.link_id = l.id
+        WHERE l.code = $1
+        ORDER BY c.clicked_at DESC
+        `,
+        [code]
+    );
+
+    return result.rows;
+}
