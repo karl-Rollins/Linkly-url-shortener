@@ -19,6 +19,7 @@ export async function linkController (req, res, next) {
 
         res.status(201).json(link)
     } catch (error) {
+        console.error("Actual controller error", error)
         throw new ValidationError(error)
     }
 }
