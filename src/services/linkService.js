@@ -2,8 +2,8 @@ import { query } from "../db/query.js";
 import { generateCode } from "../utils/generator.js";
 import { transaction } from "../db/transaction.js";
 
-export async function createLink (targetUrl) {
-    const code = generateCode()
+export async function createLink (targetUrl, customCode) {
+    const code = customCode ?? generateCode()
 
     const result = await query(
         `

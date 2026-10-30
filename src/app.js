@@ -23,6 +23,12 @@ app.use((req, res) => {
 //eslint-disable-next-line no-unused-vars
 app.use((err, req, res, _next) => {
     console.error(err)
+    
+    if (err.code === "23505") {
+        return res.status(409).json({
+            error: "code already exists",
+        })
+    }
 
     res.status(400).json({
         error: err.message,

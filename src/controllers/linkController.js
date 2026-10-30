@@ -9,7 +9,10 @@ export async function linkController (req, res, next) {
     try {
         const validated = linkSchema.parse(req.body)
 
-        const link = await createLink(validated.target_url)
+        const link = await createLink(
+            validated.target_url,
+            validated.code
+        )
 
         res.status(201).json(link)
     } catch (error) {
