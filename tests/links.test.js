@@ -14,6 +14,7 @@ test("POST /links rejects invalid URL", async () => {
 test("POST /links creates link", async () => {
     const response = await request(app).post("/links").send({
         target_url: "https://www.canva.com/",
+        code: "canva-123"
     })
 
     assert.strictEqual(response.status, 201)
