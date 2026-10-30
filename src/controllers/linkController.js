@@ -5,7 +5,9 @@ import { getLinkByCode } from "../services/linkService.js";
 import { getClicksByCode } from "../services/linkService.js";
 import { deleteLink } from "../services/linkService.js";
 import { NotFoundError } from "../errors/NotFoundError.js";
+import { ValidationError } from "../errors/ValidationError.js";
 
+//eslint-disable-next-line no-unused-vars
 export async function linkController (req, res, next) {
     try {
         const validated = linkSchema.parse(req.body)
@@ -17,7 +19,7 @@ export async function linkController (req, res, next) {
 
         res.status(201).json(link)
     } catch (error) {
-        next(error)
+        throw new ValidationError(error)
     }
 }
 
