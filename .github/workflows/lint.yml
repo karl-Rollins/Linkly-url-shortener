@@ -27,7 +27,7 @@ jobs:
         run: npm run lint
 
       - name: Create .env from .env.example
-        run: cp .env.exampl .env
+        run: cp .env.example .env
 
       - name: Run tests
         run: npm test
