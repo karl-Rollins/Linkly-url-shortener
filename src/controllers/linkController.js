@@ -4,6 +4,7 @@ import { redirectToLink } from "../services/linkService.js";
 import { getLinkByCode } from "../services/linkService.js";
 import { getClicksByCode } from "../services/linkService.js";
 import { deleteLink } from "../services/linkService.js";
+import { NotFoundError } from "../errors/NotFoundError.js";
 
 export async function linkController (req, res, next) {
     try {
@@ -31,9 +32,9 @@ export async function redirectController (req, res, next) {
         )
 
         if (!link) {
-            return res.status(404).json({
-                error: "link not found"
-            })
+            throw new NotFoundError (
+                "link not found",
+            )
         }
 
         return res.redirect(link.target_url)
@@ -50,9 +51,9 @@ export async function getLinkController (req, res, next) {
         const link = await getLinkByCode(code)
 
         if (!link) {
-            return res.status(404).json({
-                error: "link not found",
-            })
+            throw new NotFoundError(
+                "link not found"
+            )
         }
 
         return res.json(link)
@@ -69,9 +70,9 @@ export async function getClicksController (req, res, next) {
         const clicks = await getClicksByCode(code)
 
         if (!clicks) {
-            return res.status(404).json({
-                error: "click not found",
-            })
+            throw new NotFoundError (
+                "click not found"
+            )
         }
 
         return res.json(clicks)
@@ -88,9 +89,9 @@ export async function deleteLinkController (req, res, next) {
         const deleted = await deleteLink(code)
 
         if (!deleted) {
-            return res.status(404).json({
-                error: "link not found"
-            })
+            throw new NotFoundError(
+                "link not found"
+            )
         }
 
         return res.status(204).send()
