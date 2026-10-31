@@ -20,7 +20,7 @@ jobs:
           POSTGRES_DB: url_shortener_test
 
         ports:
-          - "5432:5432"
+          - "localhost:5432"
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -38,7 +38,7 @@ jobs:
 
       - name: Initialize Database Schema
         run:
-          PGPASSWORD=developer psql -h localhost -p 5432 -U developer -d url_shortener_test -f sql/schema.sql
+          PGPASSWORD=developer psql -h localhost -U developer -d url_shortener_test -f sql/schema.sql
 
       - name: Install dependencies
         run: npm ci
