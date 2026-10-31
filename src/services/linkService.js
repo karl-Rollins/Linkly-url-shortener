@@ -1,16 +1,17 @@
 import { query } from "../db/query.js";
 import { generateCode } from "../utils/generator.js";
 import { transaction } from "../db/transaction.js";
+import { GoneError } from "../errors/GoneError.js";
 
-export async function createLink (targetUrl, customCode) {
+export async function createLink (targetUrl, customCode, expiresAt) {
     const code = customCode ?? generateCode()
 
     const result = await query(
         `
-        INSERT INTO links (code, target_url)
-        VALUES ($1, $2) RETURNING *
+        INSERT INTO links (code, target_url, expires_at)
+        VALUES ($1, $2, $3) RETURNING *
         `,
-        [code, targetUrl]
+        [code, targetUrl, expiresAt ?? null]
     )
 
     return result.rows[0]
@@ -30,6 +31,10 @@ export async function redirectToLink (
 
         if (!link) {
             return null
+        }
+
+        if (link.expires_at && new Date(link.expires_at) < new Date()) {
+            throw new GoneError("link has expired")
         }
 
         await client.query(

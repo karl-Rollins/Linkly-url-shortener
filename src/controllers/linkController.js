@@ -15,7 +15,8 @@ export async function linkController (req, res, next) {
 
         const link = await createLink(
             validated.target_url,
-            validated.code
+            validated.code,
+            validated.expires_at
         )
 
         res.status(201).json(link)
