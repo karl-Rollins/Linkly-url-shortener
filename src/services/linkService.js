@@ -58,8 +58,20 @@ export async function getLinkByCode (code) {
     return result.rows[0] || null
 }
 
-export async function getClicksByCode (code) {
-    const result = await query(
+export async function getClicksByCode (code, page = 1, limit = 10) {
+    const offset = (page - 1) * limit
+
+    const countResult = await query(
+        `SELECT COUNT(*) AS total
+         FROM clicks c
+         JOIN links l
+         ON c.link_id = l.id
+         WHERE l.code = $1
+        `,
+        [code]
+    );
+
+    const clicksResult = await query(
         `
         SELECT
         c.id,
@@ -71,11 +83,20 @@ export async function getClicksByCode (code) {
         ON c.link_id = l.id
         WHERE l.code = $1
         ORDER BY c.clicked_at DESC
+        LIMIT $2
+        OFFSET $3
         `,
-        [code]
+        [code, limit, offset]
     );
 
-    return result.rows;
+    return {
+        total: Number(
+            countResult.rows[0].total
+        ),
+        page,
+        limit,
+        data: clicksResult.rows
+    }
 }
 
 export async function deleteLink (code) {

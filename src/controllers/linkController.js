@@ -69,7 +69,10 @@ export async function getClicksController (req, res, next) {
     try {
         const { code } = req.params
 
-        const clicks = await getClicksByCode(code)
+        const page = Number(req.query.page ) || 1
+        const limit = Number(req.query.limit ) || 10
+
+        const clicks = await getClicksByCode(code, page, limit)
 
         if (!clicks) {
             throw new NotFoundError (
