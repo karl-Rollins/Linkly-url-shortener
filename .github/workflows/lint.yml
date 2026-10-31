@@ -13,9 +13,9 @@ jobs:
 
     steps:
       - name: Start PostgreSQL
-        run: 
-           sudo systemctl start postgresql
-           pg_isready
+        run:  
+           sudo systemctl start postgresql.service
+           pg_isready -h localhost -p 5432
 
       - name: Initialize Database and User
         run: 
