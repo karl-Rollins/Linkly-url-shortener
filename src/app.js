@@ -1,6 +1,7 @@
 import express from "express";
 import router from "./routes/linkRoutes.js";
-import { ZodError } from "zod";
+import errorHandler from "./middleware/errorHandle.js";
+import notfound from "./middleware/notfound.js";
 
 const app = express()
 
@@ -15,40 +16,7 @@ app.get("/health", (req,res) => {
 
 app.use(router)
 
-app.use((req, res) => {
-    res.status(404).json({
-        error: "Route not found",
-    })
-})
+app.use(notfound)
 
-//eslint-disable-next-line no-unused-vars
-app.use((err, req, res, _next) => {
-    console.error(err)
-
-    if (err instanceof ZodError) {
-        return res.status(400).json({
-            error: "Validation failed",
-            // details: err.errors.map(issue => ({
-            //     field: issue.path.join('.'),
-            //     message: issue.message
-            // }))
-        })
-    }
-
-    if (err.code === "23505") {
-        return res.status(409).json({
-            error: "code already exists",
-        })
-    }
-
-    if (err.statusCode) {
-        return res.status(err.statusCode).json({
-            error: err.message,
-        })
-    }
-
-    return res.status(500).json({
-        error: "Internal server error",
-    })
-})
+app.use(errorHandler)
 export default app;
