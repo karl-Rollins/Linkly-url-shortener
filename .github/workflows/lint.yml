@@ -37,6 +37,8 @@ jobs:
           node-version: 24
 
       - name: Initialize Database Schema
+        env:
+          PGPASSWORD: developer
         run: psql -h localhost -U developer -d url_shortener_test -f sql/schema.sql
 
       - name: Install dependencies
