@@ -5,12 +5,12 @@ const errorHandler = (err, req, res, _next) => {
     console.error(err)
 
     if (err instanceof ZodError) {
-        return res.status(400).json({
+        return res.status(err.statusCode).json({
             error: "Validation failed",
-            // details: err.errors.map(issue => ({
-            //     field: issue.path.join('.'),
-            //     message: issue.message
-            // }))
+            details: err.errors.map(issue => ({
+                field: issue.path.join('.'),
+                message: issue.message
+            }))
         })
     }
 
