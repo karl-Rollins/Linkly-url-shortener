@@ -17,9 +17,12 @@ jobs:
            sudo systemctl start postgresql.service
            pg_isready -h localhost -p 5432
 
-      - name: Initialize Database and User
+      - name: Create Database User
         run: 
           sudo -u postgres psql -c "CREATE USER developer WITH PASSWORD 'developer';"
+
+      - name: Create Test Database
+        run:
           sudo -u postgres psql -c "CREATE DATABASE url_shortener_test OWNER 'developer';"
 
       - name: Checkout repository
