@@ -6,6 +6,7 @@ import { getClicksByCode } from "../services/linkService.js";
 import { deleteLink } from "../services/linkService.js";
 import { NotFoundError } from "../errors/NotFoundError.js";
 import { ValidationError } from "../errors/ValidationError.js";
+import { paginationSchema } from "../schemas/paginationSchema.js";
 
 //eslint-disable-next-line no-unused-vars
 export async function linkController (req, res, next) {
@@ -69,8 +70,9 @@ export async function getClicksController (req, res, next) {
     try {
         const { code } = req.params
 
-        const page = Number(req.query.page ) || 1
-        const limit = Number(req.query.limit ) || 10
+        // const page = Number(req.query.page ) || 1
+        // const limit = Number(req.query.limit ) || 10
+        const {page, limit} = paginationSchema.parse(req.query)
 
         const clicks = await getClicksByCode(code, page, limit)
 

@@ -1,5 +1,6 @@
 import express from "express";
 import router from "./routes/linkRoutes.js";
+import { ZodError } from "zod";
 
 const app = express()
 
@@ -23,6 +24,16 @@ app.use((req, res) => {
 //eslint-disable-next-line no-unused-vars
 app.use((err, req, res, _next) => {
     console.error(err)
+
+    if (err instanceof ZodError) {
+        return res.status(400).json({
+            error: "Validation failed",
+            // details: err.errors.map(issue => ({
+            //     field: issue.path.join('.'),
+            //     message: issue.message
+            // }))
+        })
+    }
 
     if (err.code === "23505") {
         return res.status(409).json({
