@@ -12,10 +12,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Start PostgreSQL
-        run:  
-           sudo systemctl start postgresql.service
-           pg_isready -h localhost -p 5432
+      - name: Start PostgreSQL Service
+        run: |
+         sudo systemctl enable postgresql
+         sudo systemctl start postgresql
+         # Wait a few seconds for the socket to be created
+         sleep 3
+         pg_isready -h localhost -p 5432
 
       - name: Create Database User
         run: 
