@@ -57,3 +57,15 @@ test("GET /links/:code returns 404 when missing", async () => {
 
   assert.strictEqual(response.status, 404)
 })
+
+test("Get /:code redirects", async () => {
+  const createResponse = await request(app).post("/links").send({
+    target_url: "https://www.canva.com",
+  })
+
+  const response = await request(app).get(`/${createResponse.body.code}`).redirects(0)
+
+  assert.strictEqual(response.status, 302)
+
+  assert.strictEqual(response.headers.location, "https://www.canva.com")
+})
