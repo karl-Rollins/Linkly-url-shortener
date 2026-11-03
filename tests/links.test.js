@@ -39,3 +39,15 @@ test ("POST /links rejects duplicate vanity codes", async () => {
 
     assert.strictEqual(response.status, 409)
 })
+
+test ("GET /links/:code return links details", async () => {
+  const createResponse = await request(app).post("/links").send({
+    target_url: "https://www.canva.com",
+  })
+
+  const response = await request(app).get(`/links/${createResponse.body.code}`)
+
+  assert.strictEqual(response.status, 200)
+
+  assert.strictEqual(response.body.code, createResponse.body.code)
+})
