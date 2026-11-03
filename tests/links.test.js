@@ -83,3 +83,19 @@ test("redirects increment click count", async () => {
 
   assert.strictEqual(analytics.body.click_count, 1)
 })
+
+test("DELETE removes a link", async () => {
+  const createResponse = await request(app).post("/links").send({
+    target_url: "https://www.canva.com",
+  })
+
+  const code = createResponse.body.code
+
+  const deleteResponse = await request(app).delete(`/links/${code}`)
+
+  assert.strictEqual(deleteResponse.status, 204)
+
+  const fetchResponse = await request(app).get(`/links/${code}`)
+
+  assert.strictEqual(fetchResponse.status, 404)
+})
