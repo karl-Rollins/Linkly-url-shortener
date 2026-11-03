@@ -69,3 +69,17 @@ test("Get /:code redirects", async () => {
 
   assert.strictEqual(response.headers.location, "https://www.canva.com")
 })
+
+test("redirects increment click count", async () => {
+  const createResponse = await request(app).post("/links").send({
+    target_url: "https://www.canva.com",
+  })
+
+  const code = createResponse.body.code
+
+  await request(app).get(`/${code}`).redirects(0)
+
+  const analytics = await request(app).get(`/links/${code}`).redirects(0)
+
+  assert.strictEqual(analytics.body.click_count, 1)
+})
