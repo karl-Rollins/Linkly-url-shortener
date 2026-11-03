@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { query } from "../src/db/query.js";
+import { logger } from "../src/utils/logger.js";
 
 const migrationsDir = "./sql/migrations"
 
@@ -11,9 +12,9 @@ for (const file of files) {
         path.join(migrationsDir, file), "utf8"
     )
 
-    console.log(`Running ${file}`);
+    logger.info(`Running ${file}`);
     
     await query(sql)
 }
 
-console.log("Migrations completed")
+logger.info("Migrations completed")

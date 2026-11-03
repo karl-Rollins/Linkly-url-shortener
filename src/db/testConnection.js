@@ -1,13 +1,14 @@
 import { query } from "./query.js";
+import { logger } from "../utils/logger.js";
 
 try {
     const result = await query("SELECT NOW()")
 
-    console.log(result.rows[0])
+    logger.info(result.rows[0])
 
     process.exit(0)
 } catch (error) {
-    console.error(error)
+    logger.error(error)
 
     process.exit(1)
 }
