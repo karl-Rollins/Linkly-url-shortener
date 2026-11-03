@@ -51,3 +51,9 @@ test ("GET /links/:code return links details", async () => {
 
   assert.strictEqual(response.body.code, createResponse.body.code)
 })
+
+test("GET /links/:code returns 404 when missing", async () => {
+  const response = await request(app).get("/links/not-found")
+
+  assert.strictEqual(response.status, 404)
+})
