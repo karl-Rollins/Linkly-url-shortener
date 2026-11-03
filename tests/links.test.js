@@ -9,6 +9,7 @@ beforeEach(async () => {
   await query('TRUNCATE TABLE links RESTART IDENTITY CASCADE')
 })
 
+
 test("POST /links rejects invalid URL", async () => {
   const response = await request(app).post("/links").send({
     target_url: "karl",
@@ -16,6 +17,7 @@ test("POST /links rejects invalid URL", async () => {
 
   assert.strictEqual(response.status, 400)
 });
+
 
 test("POST /links creates link", async () => {
     const response = await request(app).post("/links").send({
@@ -26,6 +28,7 @@ test("POST /links creates link", async () => {
     assert.strictEqual(response.status, 201)
     assert.strictEqual(typeof response.body.code, "string")
 })
+
 
 test ("POST /links rejects duplicate vanity codes", async () => {
     const payload = {
@@ -40,6 +43,7 @@ test ("POST /links rejects duplicate vanity codes", async () => {
     assert.strictEqual(response.status, 409)
 })
 
+
 test ("GET /links/:code return links details", async () => {
   const createResponse = await request(app).post("/links").send({
     target_url: "https://www.canva.com",
@@ -52,11 +56,13 @@ test ("GET /links/:code return links details", async () => {
   assert.strictEqual(response.body.code, createResponse.body.code)
 })
 
+
 test("GET /links/:code returns 404 when missing", async () => {
   const response = await request(app).get("/links/not-found")
 
   assert.strictEqual(response.status, 404)
 })
+
 
 test("Get /:code redirects", async () => {
   const createResponse = await request(app).post("/links").send({
@@ -69,6 +75,7 @@ test("Get /:code redirects", async () => {
 
   assert.strictEqual(response.headers.location, "https://www.canva.com")
 })
+
 
 test("redirects increment click count", async () => {
   const createResponse = await request(app).post("/links").send({
@@ -84,6 +91,7 @@ test("redirects increment click count", async () => {
   assert.strictEqual(analytics.body.click_count, 1)
 })
 
+
 test("DELETE removes a link", async () => {
   const createResponse = await request(app).post("/links").send({
     target_url: "https://www.canva.com",
@@ -98,4 +106,16 @@ test("DELETE removes a link", async () => {
   const fetchResponse = await request(app).get(`/links/${code}`)
 
   assert.strictEqual(fetchResponse.status, 404)
+})
+
+
+test("Expire links return 410", async () => {
+  const createResponse = await request(app).post("/links").send({
+    target_url: "https://www.canva.com",
+    expires_at: "2020-01-01T00:00:00Z"
+  })
+
+  const response = await request(app).get(`/${createResponse.body.code}`)
+
+  assert.strictEqual(response.status, 410)
 })

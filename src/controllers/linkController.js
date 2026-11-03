@@ -48,6 +48,10 @@ export async function redirectController (req, res, next) {
         return res.redirect(link.target_url)
 
     } catch (error) {
+        if (error.name === "GoneError" || error.message.includes("link has expired")){
+            return res.status(410).json({ error: error.message })
+        }
+
         next(error)
     }
 }
