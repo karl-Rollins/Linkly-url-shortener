@@ -21,6 +21,10 @@ export async function linkController (req, res, next) {
 
         res.status(201).json(link)
     } catch (error) {
+        if (error.name === "ConflictError" || error.message.includes('already exist')){
+            return res.status(409).json({ error: error.message })
+        }
+        
         throw new ValidationError(error)
     }
 }

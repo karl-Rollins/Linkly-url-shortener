@@ -2,9 +2,21 @@ import { query } from "../db/query.js";
 import { generateCode } from "../utils/generator.js";
 import { transaction } from "../db/transaction.js";
 import { GoneError } from "../errors/GoneError.js";
+import { ConflictError } from "../errors/ConflictError.js";
 
 export async function createLink (targetUrl, customCode, expiresAt) {
     const code = customCode ?? generateCode()
+    
+    if (customCode) {
+        const existingLink = await query(
+            'SELECT 1 FROM links WHERE code = $1',
+            [customCode]
+        )
+
+        if (existingLink.rows.length > 0) {
+            throw new ConflictError("custom code already exist")
+        }
+    }
 
     const result = await query(
         `
