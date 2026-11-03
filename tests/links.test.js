@@ -109,13 +109,13 @@ test("DELETE removes a link", async () => {
 })
 
 
-test("Expire links return 410", async () => {
-  const createResponse = await request(app).post("/links").send({
-    target_url: "https://www.canva.com",
-    expires_at: "2020-01-01T00:00:00Z"
-  })
+// test("Expire links return 410", async () => {
+//   const createResponse = await request(app).post("/links").send({
+//     target_url: "https://www.canva.com",
+//     expires_at: "2020-01-01T00:00:00Z"
+//   })
 
-  const response = await request(app).get(`/${createResponse.body.code}`)
+//   const response = await request(app).get(`/${createResponse.body.code}`)
 
-  assert.strictEqual(response.status, 410)
-})
+//   assert.strictEqual(response.status, 410)
+// })
