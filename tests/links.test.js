@@ -119,3 +119,19 @@ test("DELETE removes a link", async () => {
 
 //   assert.strictEqual(response.status, 410)
 // })
+
+test("exports click history as csv", async () => {
+  const createResponse =await request(app).post("/links").send({
+    target_url: "https://github.com",
+  })
+
+  const code = createResponse.body.code
+
+  await request(app).get(`/${code}`).redirects(0)
+
+  const response = await request(app).get(`/links/${code}/clicks.csv`,);
+
+  assert.strictEqual(response.status, 200)
+
+  assert.match(response.text, /clicked_at/,);
+});
