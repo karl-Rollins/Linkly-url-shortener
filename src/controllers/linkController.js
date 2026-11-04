@@ -7,6 +7,7 @@ import { deleteLink } from "../services/linkService.js";
 import { NotFoundError } from "../errors/NotFoundError.js";
 import { ValidationError } from "../errors/ValidationError.js";
 import { paginationSchema } from "../schemas/paginationSchema.js";
+import { getClicksForExport } from "../services/linkService.js";
 
 //eslint-disable-next-line no-unused-vars
 export async function linkController (req, res, next) {
@@ -111,6 +112,30 @@ export async function deleteLinkController (req, res, next) {
         }
 
         return res.status(204).send()
+    } catch (error) {
+        next(error)
+    }
+}
+
+export async function exportClicksController (req, res, next) {
+    try{
+        const { code } = req.params
+        const clicks = await getClicksForExport (code)
+
+        res.setHeader("Content-Type", "text/csv")
+        res.setHeader("Content-Disposition", `attachment: filename="${code}-clicks.csv"` )
+
+        res.write("id,referrer,user_agent,clicked_at\n",)
+
+        for (const click of clicks) {
+            res.write(
+                `${click.id}, "${click.referrer ?? ""}", "${click.user_agent ?? ""}", 
+                ${click.clicked_at.toISOString()}\n
+                `
+            )
+        }
+
+        res.end()
     } catch (error) {
         next(error)
     }
