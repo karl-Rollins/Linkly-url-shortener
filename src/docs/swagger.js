@@ -8,8 +8,9 @@ const options = {
             title: "Linkly",
             version: "1.0.0",
             description: `
-                A URL Shortener application.
+                A URL Shortener API.
                 This API allows users to create, retrieve, track, and delete shortened URLs.
+                Interactive documentation available at: /api-docs
             `,
         },
 
@@ -100,7 +101,7 @@ const options = {
             "/links/{code}": {
                 get: {
                     tags: ["Links"],
-                    summary: "Get link metadata (Does not record click",
+                    summary: "Get link metadata (Does not record click)",
                     parameters: [
                         {
                             $ref: "#/components/parameters/Code"
@@ -150,12 +151,13 @@ const options = {
                             $ref: "#/components/parameters/Code"
                         },
                         {
-                            name: "after",
+                            name: "page",
                             in: "query",
                             description: "Cursro: last click ID from previous page (exclusive first page)",
                             schema: {
                                 type: "integer",
-                                minimum: 1
+                                minimum: 1,
+                                default: 1
                             }
                         },
                         {
@@ -166,7 +168,7 @@ const options = {
                                 type: "integer",
                                 minimum: 1,
                                 maximum: 100,
-                                default: 20
+                                default: 10
                             }
                         }
                     ],
@@ -206,7 +208,7 @@ const options = {
                                 Location: {
                                     schema: {
                                         type: "string",
-                                        format: "url"
+                                        format: "uri"
                                     }
                                 }
                             }
@@ -216,6 +218,32 @@ const options = {
                         },
                         "410": {
                             description: "Gone, Link expired"
+                        }
+                    }
+                }
+            },
+            "/links/{code}/clicks.csv": {
+                get: {
+                    tags: ["Analytics"],
+                    summary: "Export click history as CSV",
+                    parameters: [
+                        {
+                            $ref: "#/components/parameters/Code"
+                        }
+                    ],
+                    responses: {
+                        "200": {
+                            description: "CSV export",
+                            content: {
+                               "text/csv": {
+                                    schema: {
+                                        type: "string"
+                                    }
+                                } 
+                            }
+                        },
+                        "404": {
+                            $ref: "#/components/responses/NotFound"
                         }
                     }
                 }
@@ -240,13 +268,14 @@ const options = {
                     properties: {
                         target_url: {
                             type: "string",
-                            format: "url",
+                            format: "uri",
                             description: "Using http or http"
                         },
                         code: {
                             type: "string",
-                            pattern: "^[A-Za-z0-9_-]{3-16}$",
-                            description: "Optional, or auto if missing"
+                            pattern: "^[A-Za-z0-9_-]{3,16}$",
+                            description: "Optional, or auto if missing",
+                            example: "my-portfolio"
                         },
                         expires_at: {
                             type: "string",
@@ -263,7 +292,9 @@ const options = {
                         },
                         target_url: {
                             type: "string",
-                            format: "url"
+                            format: "uri",
+
+                            example: "https://github.com"
                         },
                         created_at: {
                             type: "string",
@@ -276,7 +307,8 @@ const options = {
                         },
                         click_count: {
                             type: "integer",
-                            minimum: 0
+                            minimum: 0,
+                            example: 42
                         },
                     }
                 },
@@ -303,16 +335,20 @@ const options = {
                 ClickPage: {
                     type: "object",
                     properties: {
+                        page: {
+                            type: "integer",
+                        },
+                        limit: {
+                            type: "integer",
+                        },
+                        total: {
+                            type: "integer",
+                        },
                         data: {
                             type: "array",
                             items: {
                                 $ref: "#/components/schemas/Click"
                             }
-                        },
-                        next_cursor: {
-                            type: "integer",
-                            nullable: true,
-                            description: "Pass as ?after= on next request (Null for no more pages)"
                         }
                     }
                 },
@@ -327,17 +363,21 @@ const options = {
                         },
                         issues: {
                             type: "array",
-                            properties: {
-                                path: {
-                                    type: "array",
-                                    items: {
+                            items: {
+                                type: "objects",
+                                properties: {
+                                    path: {
+                                        type: "array",
+                                        items: {
+                                            type: "string"
+                                        }
+                                    },
+                                    message: {
                                         type: "string"
                                     }
-                                },
-                                message: {
-                                    type: "string"
                                 }
                             }
+                            
                         }
                     }
                 }
@@ -374,9 +414,7 @@ const options = {
                     }
                 }
             }
-
         }
-
 
     },
 
