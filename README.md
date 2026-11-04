@@ -226,7 +226,7 @@ url-shortener/
 
 ```bash
 # Clone the repository
-git clone https://github.com/mike2377/url_linkly.git
+git clone https://github.com/karl-Rollins/Linkly-url-shortener.git
 
 # Move into the project directory
 cd url_linkly
