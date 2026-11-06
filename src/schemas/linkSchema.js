@@ -4,12 +4,14 @@ export const linkSchema = z.object({
     target_url: z.url()
                  .refine(
                     (url) => {
-                        const parsed = new URL(url)
+                        try {const parsed = new URL(url)
 
                         return (
                             parsed.protocol === "http:" ||
                             parsed.protocol === "https:"
-                        )
+                        )} catch {
+                            return false
+                        }
                     },
                     {
                         message: "only HTTP and HTTPS URLs are allowed"
