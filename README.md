@@ -372,6 +372,12 @@ The obvious approach (`SELECT click_count; UPDATE click_count = N + 1`) loses up
 
 **Solution**: In the env files i changed port to the default 5432 and created the databases manually
 
+### 4. Keyset Pagination with Correct Cursor Semantics
+
+`OFFSET` degrades linearly with page count and can skip rows when new clicks arrive mid-pagination.
+
+**Solution**: `WHERE id < $2 ORDER BY id DESC LIMIT $3`. Fetch `limit + 1` rows to detect the next page without a separate `COUNT(*)`. Return only `limit` rows plus `next_cursor`. No `OFFSET`, no performance cliff.
+
 ---
 
 ## 📚 What I Learned
