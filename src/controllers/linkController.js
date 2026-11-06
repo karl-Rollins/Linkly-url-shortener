@@ -87,17 +87,15 @@ export async function getClicksController (req, res, next) {
     try {
         const { code } = req.params
 
-        // const page = Number(req.query.page ) || 1
-        // const limit = Number(req.query.limit ) || 10
+        const link = await getLinkByCode (code)
+
+        if (!link) {
+            throw new NotFoundError("link not found")
+        }
+
         const {after, limit} = paginationSchema.parse(req.query)
 
         const clicks = await getClicksByCode(code, after, limit)
-
-        if (!clicks) {
-            throw new NotFoundError (
-                "click not found"
-            )
-        }
 
         return res.json(clicks)
 
@@ -127,6 +125,13 @@ export async function deleteLinkController (req, res, next) {
 export async function exportClicksController (req, res, next) {
     try{
         const { code } = req.params
+
+        const link = await getLinkByCode (code)
+
+        if (!link) {
+            throw new NotFoundError("link not found")
+        }
+        
         const clicks = await getClicksForExport (code)
 
         res.setHeader("Content-Type", "text/csv")
