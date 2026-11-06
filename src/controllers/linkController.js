@@ -82,9 +82,9 @@ export async function getClicksController (req, res, next) {
 
         // const page = Number(req.query.page ) || 1
         // const limit = Number(req.query.limit ) || 10
-        const {page, limit} = paginationSchema.parse(req.query)
+        const {after, limit} = paginationSchema.parse(req.query)
 
-        const clicks = await getClicksByCode(code, page, limit)
+        const clicks = await getClicksByCode(code, after, limit)
 
         if (!clicks) {
             throw new NotFoundError (

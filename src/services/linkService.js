@@ -75,44 +75,44 @@ export async function getLinkByCode (code) {
     return result.rows[0] || null
 }
 
-export async function getClicksByCode (code, page = 1, limit = 10) {
-    const offset = (page - 1) * limit
+export async function getClicksByCode (code, after, limit = 20) {
+    const params = [code]
 
-    const countResult = await query(
-        `SELECT COUNT(*) AS total
+    let whereClause = ""
+
+    if (after) {
+        whereClause = "AND c.id < $2"
+
+        params.push(after);
+    }
+
+    params.push(limit);
+
+    const limitIndex = params.length;
+
+    const result = await query(
+        `SELECT
+         c.id,
+         c.referrer,
+         c.user_agent,
+         c.clicked_at
          FROM clicks c
-         JOIN links l
-         ON c.link_id = l.id
+         JOINS links l
+            ON c.link_id = l.id
          WHERE l.code = $1
+         ${whereClause}
+         ORDER BY c.id DESC
+         LIMIT $${limitIndex}
         `,
-        [code]
+        params
     );
 
-    const clicksResult = await query(
-        `
-        SELECT
-        c.id,
-        c.referrer,
-        c.user_agent,
-        c.clicked_at
-        FROM clicks c
-        JOIN links l
-        ON c.link_id = l.id
-        WHERE l.code = $1
-        ORDER BY c.clicked_at DESC
-        LIMIT $2
-        OFFSET $3
-        `,
-        [code, limit, offset]
-    );
+    const data = result.rows
 
     return {
-        total: Number(
-            countResult.rows[0].total
-        ),
-        page,
-        limit,
-        data: clicksResult.rows
+       data,
+       next_cursor:
+          data.length > 0 ? data[ data.length - 1 ].id : null
     }
 }
 

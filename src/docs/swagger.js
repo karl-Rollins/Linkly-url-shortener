@@ -145,30 +145,29 @@ const options = {
             "/links/{code}/clicks": {
                 get: {
                     tags: ["Analytics"],
-                    summary: "Paginated click log for a link",
+                    summary: "Keyset paginated click log for a link",
                     parameters: [
                         {
                             $ref: "#/components/parameters/Code"
                         },
                         {
-                            name: "page",
+                            name: "after",
                             in: "query",
-                            description: "Cursro: last click ID from previous page (exclusive first page)",
+                            description: "Cursor returned from the previous response. Omit for the first page.",
                             schema: {
                                 type: "integer",
-                                minimum: 1,
-                                default: 1
+                                minimum: 1
                             }
                         },
                         {
                             name: "limit",
                             in: "query",
-                            description: "Page size (max 100, default 20)",
+                            description: "Number of records to return",
                             schema: {
                                 type: "integer",
                                 minimum: 1,
                                 maximum: 100,
-                                default: 10
+                                default: 20
                             }
                         }
                     ],
@@ -335,21 +334,34 @@ const options = {
                 ClickPage: {
                     type: "object",
                     properties: {
-                        page: {
-                            type: "integer",
-                        },
-                        limit: {
-                            type: "integer",
-                        },
-                        total: {
-                            type: "integer",
-                        },
                         data: {
                             type: "array",
                             items: {
                                 $ref: "#/components/schemas/Click"
                             }
+                        },
+                        next_cursor: {
+                            type: "integer",
+                            nullable: true,
+                            description: "Use as the value of ?after= on the next request. Null means no more results."
                         }
+                    },
+                    example: {
+                        data: [
+                            {
+                                id: 50,
+                                referrer: "https://twitter.com",
+                                user_agent: "Mozilla/5.0",
+                                clicked_at: "2026-10-27T10:00:00Z"
+                            },
+                            {
+                                id: 49,
+                                referrer: null,
+                                user_agent: "PostmanRuntime/7.45.0",
+                                clicked_at: "2026-10-27T09:58:00Z"
+                            }
+                        ],
+                        next_cursor: 49
                     }
                 },
                 Error: {
