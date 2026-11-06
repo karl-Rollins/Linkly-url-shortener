@@ -131,20 +131,18 @@ export async function exportClicksController (req, res, next) {
         if (!link) {
             throw new NotFoundError("link not found")
         }
-        
+
         const clicks = await getClicksForExport (code)
 
         res.setHeader("Content-Type", "text/csv")
-        res.setHeader("Content-Disposition", `attachment: filename="${code}-clicks.csv"` )
+        res.setHeader("Content-Disposition", `attachment; filename="${code}-clicks.csv"` )
 
         res.write("id,referrer,user_agent,clicked_at\n",)
 
         for (const click of clicks) {
             res.write(
-                `${click.id}, "${click.referrer ?? ""}", "${click.user_agent ?? ""}", 
-                ${click.clicked_at.toISOString()}\n
-                `
-            )
+                `${click.id},${click.referrer ?? ""},${click.user_agent ?? ""},${click.clicked_at.toISOString()}\n`
+            );
         }
 
         res.end()
