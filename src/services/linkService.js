@@ -97,7 +97,7 @@ export async function getClicksByCode (code, after, limit = 20) {
          c.user_agent,
          c.clicked_at
          FROM clicks c
-         JOINS links l
+         JOIN links l
             ON c.link_id = l.id
          WHERE l.code = $1
          ${whereClause}
