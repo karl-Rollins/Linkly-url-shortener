@@ -50,7 +50,7 @@ jobs:
       - name: Create .env and .env.test from .env.example
         run: |
             cp .env.example .env
-            cp .env.test.example .env.test
+            cp .env.example .env.test
 
       - name: Run tests
         run: npm test
