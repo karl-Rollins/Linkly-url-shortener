@@ -10,7 +10,7 @@ import { paginationSchema } from "../schemas/paginationSchema.js";
 import { getClicksForExport } from "../services/linkService.js";
 import { ZodError } from "zod";
 
-//eslint-disable-next-line no-unused-vars
+
 export async function linkController (req, res, next) {
     try {
         const validated = linkSchema.parse(req.body)

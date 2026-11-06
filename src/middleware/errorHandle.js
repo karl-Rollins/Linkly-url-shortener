@@ -7,11 +7,17 @@ const errorHandler = (err, req, res, _next) => {
 
     if (err instanceof ZodError) {
         return res.status(err.statusCode).json({
-            error: "Validation failed",
-            details: err.errors.map(issue => ({
-                field: issue.path.join('.'),
-                message: issue.message
-            }))
+            "error": "Validation failed",
+            // details: err.errors.map(issue => ({
+            //     field: issue.path.join('.'),
+            //     message: issue.message
+            // }))
+            "issues": [
+                {
+                    "path": ["target_url"],
+                    "message": "Invalid Url"
+                }
+            ]
         })
     }
 
