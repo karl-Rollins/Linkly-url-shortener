@@ -266,7 +266,7 @@ npm run dev
 ```
 
 The API is available at `http://localhost:3000`.
-Swagger UI: <<http://localhost:3000/docs>>
+Swagger UI: <<http://localhost:3000/api-docs>>
 
 ### Useful Scripts
 
