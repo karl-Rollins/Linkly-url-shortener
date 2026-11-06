@@ -8,6 +8,7 @@ import { NotFoundError } from "../errors/NotFoundError.js";
 import { ValidationError } from "../errors/ValidationError.js";
 import { paginationSchema } from "../schemas/paginationSchema.js";
 import { getClicksForExport } from "../services/linkService.js";
+import { ZodError } from "zod";
 
 //eslint-disable-next-line no-unused-vars
 export async function linkController (req, res, next) {
@@ -26,7 +27,13 @@ export async function linkController (req, res, next) {
             return res.status(409).json({ error: error.message })
         }
         
-        throw new ValidationError(error)
+        if (error instanceof ZodError) {
+            return next(
+                new ValidationError ("validation failed", error.issues)
+            )
+        }
+
+        next (error)
     }
 }
 
