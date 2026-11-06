@@ -47,8 +47,10 @@ jobs:
       - name: Run linter
         run: npm run lint
 
-      - name: Create .env from .env.example
-        run: cp .env.example .env
+      - name: Create .env and .env.test from .env.example
+        run: |
+            cp .env.example .env
+            cp .env.test.example .env.test
 
       - name: Run tests
         run: npm test
