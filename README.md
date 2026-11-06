@@ -23,9 +23,9 @@ This project aims to:
 ### Create Short Links
 
 - `POST /links` with `{ target_url, code?, expires_at? }`
-- Returns **201 Created** with `short_url`, `created_at`, `click_count: 0`
+- Returns **201 Created** with  `created_at`, `click_count: 0`
 - **Vanity codes** accepted if they match `^[A-Za-z0-9_-]{3,16}$`
-- **Random base62 codes** generated automatically if omitted
+- **Random base64 codes** generated automatically if omitted
 - Duplicate codes rejected with **409 Conflict**
 - Invalid URLs / malformed codes rejected with **400 Bad Request**
 
@@ -35,7 +35,7 @@ This project aims to:
 - **404 Not Found** for unknown codes
 - **410 Gone** for expired links (checked at read time, never cached)
 - **`click_count` incremented** in the same transaction as the click log insert
-- **User-Agent and Referer** captured per click
+- **User_Agent and Referer** captured per click
 
 ### Click Counter
 
@@ -49,16 +49,16 @@ This project aims to:
 
 ### Click Log with Keyset Pagination
 
-- `GET /links/:code/clicks?page=&limit=` returns `{ data, total_pages, current_page }`
-- Uses `LIMIT $1 OFFSET $2` order by `id DESC`
-- Page numbers start at `1`; `limit` determines the rows per page
-- `limit` is bounded by Zod (`1..100`, default `10`)
+- `GET /links/:code/clicks?after=&limit=` returns `{ data, next_cursor }`
+- Uses `id < $2 ORDER BY id DESC LIMIT $3` - **no OFFSET**
+- Cursor is the last seen click ID; `null` means no more pages
+- `limit` is bounded by Zod (`1..100`, default `20`)
 
 ### CSV Export
 
 - `GET /links/:code/clicks.csv` streams the full log
 - `Content-Type: text/csv` + `Content-Disposition: attachment`
-- Fetched in **batches of 1000 rows** to avoid loading everything into memory
+- Exports click history as CSV.
 - Manual field escaping: quotes, commas, newlines handled
 
 ### 🗑️ Delete with Cascade
@@ -73,22 +73,16 @@ This project aims to:
 - `code` must match `^[A-Za-z0-9_-]{3,16}$`
 - `expires_at` must be a valid ISO 8601 date-time
 
-### ⚡ Rate Limiter on POST /links
+### OpenAPI 3.0 + Swagger UI
 
-- **100 requests/minute per IP** - in-memory, no external dependency
-- **429 Too Many Requests** with `Retry-After` header (minimum 1s)
-- In-memory only - single-process deployments only (documented)
-
-### OpenAPI 3.1 + Swagger UI
-
-- Complete spec at `src/docs/openapi.json` covering all 7 endpoints
-- Served interactively at **`GET /docs`**
+- Complete spec at `src/docs/swagger/js` covering all 7 endpoints
+- Served interactively at **`GET /api-docs`**
 - **Try it out** button works from the browser
 
 ### 💚 Health Check
 
 - `GET /health` runs `SELECT 1` against the database
-- **200** `{ status: "ok", database: "ok" }` when live
+- **200** `{ status: "ok" }` when live
 - **503** when the DB is unreachable
 
 ---
@@ -115,6 +109,31 @@ This project aims to:
 - **ESLint 9**
 
 ---
+
+## Design Decisions
+
+### Transactions
+
+A redirect performs two operations:
+
+1. Insert click log
+2. Increment click_count
+
+Both operations run inside the same transaction so they either succeed together or fail together.
+
+### Database Constraints
+
+The database enforces:
+
+- UNIQUE(code)
+- CHECK(click_count >= 0)
+- FK ON DELETE CASCADE
+
+This prevents invalid data even if application bugs occur.
+
+### Cursor Pagination
+
+Click history uses keyset pagination with a cursor (`after`) instead of OFFSET because it scales better on large datasets.
 
 ## 📐 Database Schema
 
@@ -229,21 +248,18 @@ url-shortener/
 git clone https://github.com/karl-Rollins/Linkly-url-shortener.git
 
 # Move into the project directory
-cd url_linkly
+cd Linkly-url-shortener
 
 # Install dependencies
 npm install
 
 # Create the databases
-createdb linkly
-createdb linkly_test
+createdb url_shortener
+createdb url_shortener_test
 
 # Configure environment
 cp .env.example .env
 # Edit .env with your DATABASE_URL and TEST_DATABASE_URL
-
-# Apply the schema
-npm run db:setup
 
 # Start the development server
 npm run dev
