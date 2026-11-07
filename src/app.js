@@ -4,9 +4,12 @@ import errorHandler from "./middleware/errorHandle.js";
 import notfound from "./middleware/notfound.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./docs/swagger.js";
+import cors from "cors"
 
 
 const app = express()
+
+app.use(cors())
 
 app.use(express.json()) // req.body is undefined without this.
 
