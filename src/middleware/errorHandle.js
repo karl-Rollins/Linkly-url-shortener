@@ -1,24 +1,23 @@
 import { ZodError } from "zod";
 import { logger } from "../utils/logger.js";
+import { ValidationError } from "../errors/ValidationError.js";
 
 //eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, _next) => {
     logger.error(err)
 
     if (err instanceof ZodError) {
-        return res.status(err.statusCode).json({
-            "error": "Validation failed",
-            // details: err.errors.map(issue => ({
-            //     field: issue.path.join('.'),
-            //     message: issue.message
-            // }))
-            "issues": [
-                {
-                    "path": ["target_url"],
-                    "message": "Invalid Url"
-                }
-            ]
+        return res.status(400).json({
+            error: "Validation failed",
+            issues: err.issues
         })
+    }
+
+    if (err instanceof ValidationError) {
+        return res.status(400).json({
+            error: err.message,
+            issues: err.issues,
+        });
     }
 
     if (err.code === "23505") {
@@ -32,6 +31,8 @@ const errorHandler = (err, req, res, _next) => {
             error: err.message,
         })
     }
+
+    logger.err(err)
 
     return res.status(500).json({
         error: "Internal server error",
