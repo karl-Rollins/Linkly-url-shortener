@@ -1,9 +1,11 @@
 import test from "node:test";
+import { after } from "node:test";
 import assert from "node:assert";
 import request from "supertest";
 import app from "../src/app.js";
 import { beforeEach } from "node:test";
 import { query } from "../src/db/query.js";
+import { pool } from "../src/db/pool.js";
 
 beforeEach(async () => {
   await query('TRUNCATE TABLE links RESTART IDENTITY CASCADE')
@@ -109,16 +111,25 @@ test("DELETE removes a link", async () => {
 })
 
 
-// test("Expire links return 410", async () => {
-//   const createResponse = await request(app).post("/links").send({
-//     target_url: "https://www.canva.com",
-//     expires_at: "2020-01-01T00:00:00Z"
-//   })
+test("Expire links return 410", async () => {
+  await query(`
+  INSERT INTO links (
+    code,
+    target_url,
+    expires_at
+  )
+  VALUES (
+    'expired-test',
+    'https://github.com',
+    NOW() - interval '1 day'
+  )
+`);
 
-//   const response = await request(app).get(`/${createResponse.body.code}`)
 
-//   assert.strictEqual(response.status, 410)
-// })
+  const response = await request(app).get("/expired-test")
+
+  assert.strictEqual(response.status, 410)
+})
 
 test("exports click history as csv", async () => {
   const createResponse =await request(app).post("/links").send({
@@ -175,4 +186,8 @@ test("sql injection attempt is harmless", async () => {
       response.status,
       400,
     );
+});
+
+after(async () => {
+  await pool.end();
 });
