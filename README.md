@@ -139,25 +139,25 @@ Click history uses keyset pagination with a cursor (`after`) instead of OFFSET b
 
 ```sql
 CREATE TABLE links (
-    id SERIAL PRIMARY KEY,
-    code VARCHAR(16) UNIQUE NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    code VARCHAR(16) NOT NULL UNIQUE,
     target_url TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    expires_at TIMESTAMPTZ,
-    click_count INTEGER NOT NULL DEFAULT 0 CHECK (click_count >= 0)
+    click_count INT NOT NULL DEFAULT 0 CHECK( click_count >= 0 ),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMPTZ
 );
 
 CREATE TABLE clicks (
-    id SERIAL PRIMARY KEY,
-    link_id INTEGER NOT NULL REFERENCES links(id) ON DELETE CASCADE,
-    clicked_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    id BIGSERIAL PRIMARY KEY,
+    link_id BIGINT NOT NULL REFERENCES links(id) ON DELETE CASCADE,
     referrer TEXT,
-    user_agent TEXT
+    user_agent TEXT,
+    clicked_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Indexes for the click log and keyset pagination
-CREATE INDEX clicks_link_id_clicked_at_idx ON clicks (link_id, clicked_at);
-CREATE INDEX clicks_link_id_id_desc_idx ON clicks (link_id, id DESC);
+CREATE INDEX idx_clicks_link_id_clicked_at 
+ON clicks( link_id, clicked_at );
 ```
 
 The `UNIQUE(code)` constraint provides the index used by every redirect lookup. Verified with `EXPLAIN`:
@@ -214,14 +214,12 @@ url-shortener/
 │   └── utils/
 │       ├── generator.js
 │       └── logger.js
-├── test/
+├── tests/
 │   ├── generateCode.test.js
 │   ├── health.test.js
 │   ├── links.test.js
 │   └── linkSchema.test.js
-├── .env
 ├── .env.example
-├── .env.test
 ├── eslint.config.js
 ├── .gitignore
 ├── .nvmrc
@@ -361,12 +359,13 @@ Runs `node:test` against `url_shortener_test`.
 
 | Category | What's tested |
 | --- | --- |
-| Contract | 201/400/404/409/410/429 per endpoint |
+| Contract | 201/400/404/409/410 per endpoint |
 | generateCode | genrates a string, max length 7 |
 | Zod validation | URL schemes (`javascript:`, `data:`, `file:` rejected), code patterns, limits |
-| Pagination | pages and limit, `OFFSET`, `total_pages, current_page, data: null` at end |
+| Pagination | Cursor-based, no `OFFSET`, `next_cursor: null` at end |
 | CSV streaming | Header, rows, correct `Content-Type`/`Content-Disposition` |
 | Cascade delete | No orphan clicks after `DELETE /links/:code` |
+| Security | SQL injection attempts stay literal, `links` table survives |
 
 ---
 
