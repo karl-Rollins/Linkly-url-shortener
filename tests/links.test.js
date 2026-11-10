@@ -135,3 +135,31 @@ test("exports click history as csv", async () => {
 
   assert.match(response.text, /clicked_at/,);
 });
+
+
+test("concurrent redirects increment click count correctly",async () => {
+      const createResponse =await request(app).post("/links").send({
+            target_url:
+              "https://github.com",
+      });
+
+      const code =createResponse.body.code;
+
+      const requests = Array.from(
+        { length: 50 },
+        () =>
+          request(app)
+            .get(`/${code}`)
+            .redirects(0),
+      );
+
+      await Promise.all(requests);
+
+      const analytics = await request(app).get(`/links/${code}`);
+
+      assert.strictEqual(
+        analytics.body.click_count,
+        50,
+      );
+  },
+);

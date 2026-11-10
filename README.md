@@ -413,6 +413,7 @@ Generating CSV files seemed straightforward until real-world data was introduced
 - **`TRUNCATE ... RESTART IDENTITY CASCADE`** for test isolation without re-creating the schema every run
 - Debugging real production issues ( `--eslintrc` flag,)
 - migration. How it works and implemented.
+- Concurrent redirect test to verify atomic click counting under load
 
 ---
 
