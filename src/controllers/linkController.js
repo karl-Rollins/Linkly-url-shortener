@@ -10,6 +10,23 @@ import { paginationSchema } from "../schemas/paginationSchema.js";
 import { getClicksForExport } from "../services/linkService.js";
 import { ZodError } from "zod";
 
+import { query } from "../db/query.js";
+
+export async function healthController(req,res,) {
+  try {
+    await query("SELECT 1");
+
+    return res.status(200).json({
+      status: "ok",
+      database: "ok",
+    });
+  } catch  {
+    return res.status(503).json({
+      status: "error",
+      database: "down",
+    });
+  }
+}
 
 export async function linkController (req, res, next) {
     try {

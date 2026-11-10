@@ -5,6 +5,7 @@ import notfound from "./middleware/notfound.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./docs/swagger.js";
 import cors from "cors"
+import { healthController } from "./controllers/linkController.js"
 
 
 const app = express()
@@ -21,11 +22,7 @@ app.use(
 )
 
 
-app.get("/health", (req,res) => {
-    res.status(200).json({
-        status: "ok",
-    })
-})
+app.get("/health", healthController)
 
 app.use(router)
 
