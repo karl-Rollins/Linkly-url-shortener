@@ -9,7 +9,7 @@ import { ValidationError } from "../errors/ValidationError.js";
 import { paginationSchema } from "../schemas/paginationSchema.js";
 import { getClicksForExport } from "../services/linkService.js";
 import { ZodError } from "zod";
-
+import { clicksToCsv } from "../utils/csvFormatter.js";
 import { query } from "../db/query.js";
 
 export async function healthController(req,res,) {
@@ -61,7 +61,7 @@ export async function redirectController (req, res, next) {
         const link = await redirectToLink (
             code,
             req.get("referrer") || null,
-            req.get("user_agent") || null
+            req.get("user-agent") || null
         )
 
         if (!link) {
@@ -139,31 +139,33 @@ export async function deleteLinkController (req, res, next) {
     }
 }
 
-export async function exportClicksController (req, res, next) {
-    try{
-        const { code } = req.params
+export async function exportClicksController(req,res,next) {
+  try {
+    const { code } = req.params;
 
-        const link = await getLinkByCode (code)
+    const clicks =
+      await getClicksForExport(code);
 
-        if (!link) {
-            throw new NotFoundError("link not found")
-        }
-
-        const clicks = await getClicksForExport (code)
-
-        res.setHeader("Content-Type", "text/csv")
-        res.setHeader("Content-Disposition", `attachment; filename="${code}-clicks.csv"` )
-
-        res.write("id,referrer,user_agent,clicked_at\n",)
-
-        for (const click of clicks) {
-            res.write(
-                `${click.id},${click.referrer ?? ""},${click.user_agent ?? ""},${click.clicked_at.toISOString()}\n`
-            );
-        }
-
-        res.end()
-    } catch (error) {
-        next(error)
+    if (clicks === null) {
+      throw new NotFoundError(
+        "Link not found",
+      );
     }
+
+    const csv =clicksToCsv(clicks);
+
+    res.setHeader(
+      "Content-Type",
+      "text/csv",
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${code}-clicks.csv"`,
+    );
+
+    return res.status(200).send(csv);
+  } catch (error) {
+    next(error);
+  }
 }

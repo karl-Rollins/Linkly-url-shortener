@@ -394,6 +394,12 @@ The obvious approach (`SELECT click_count; UPDATE click_count = N + 1`) loses up
 
 **Solution**: `WHERE id < $2 ORDER BY id DESC LIMIT $3`. Fetch `limit + 1` rows to detect the next page without a separate `COUNT(*)`. Return only `limit` rows plus `next_cursor`. No `OFFSET`, no performance cliff.
 
+### 5. CSV Export and Data Escaping
+
+Generating CSV files seemed straightforward until real-world data was introduced. Browser User-Agent strings and referrer URLs can contain commas and quotation marks, which break CSV parsing if fields are not escaped properly.
+
+**Solution:** Implemented a dedicated CSV escaping helper that wraps fields in quotes and doubles embedded quotes according to the CSV specification. This ensured exported files open correctly in spreadsheet applications and CSV parsers.
+
 ---
 
 ## 📚 What I Learned
