@@ -107,12 +107,19 @@ export async function getClicksByCode (code, after, limit = 20) {
         params
     );
 
-    const data = result.rows
+    const rows = result.rows.map(
+        (row) => ({...row, id: Number(row.id)})
+    )
+
+    const hasMore = rows.length > limit;
+
+    const data = hasMore ? rows.slice(0, limit) : rows
+
 
     return {
        data,
        next_cursor:
-          data.length > 0 ? data[ data.length - 1 ].id : null
+          hasMore ? data[ data.length - 1 ].id : null
     }
 }
 
