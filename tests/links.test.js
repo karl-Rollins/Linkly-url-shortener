@@ -163,3 +163,16 @@ test("concurrent redirects increment click count correctly",async () => {
       );
   },
 );
+
+test("sql injection attempt is harmless", async () => {
+  const response = await request(app).post("/links")
+        .send({
+          target_url: "https://github.com",
+          code: "'; DROP TABLE links; --",  
+        });
+
+    assert.strictEqual(
+      response.status,
+      400,
+    );
+});

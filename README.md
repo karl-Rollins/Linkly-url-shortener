@@ -414,6 +414,7 @@ Generating CSV files seemed straightforward until real-world data was introduced
 - Debugging real production issues ( `--eslintrc` flag,)
 - migration. How it works and implemented.
 - Concurrent redirect test to verify atomic click counting under load
+- Includes regression tests against malicious input and SQL injection attempts
 
 ---
 
