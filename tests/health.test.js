@@ -11,6 +11,7 @@ test("GET /health return 200", async () => {
         response.body,
         {
             status: "ok",
+            database: "ok"
         }
     )
 })
