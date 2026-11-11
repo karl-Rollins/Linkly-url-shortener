@@ -86,7 +86,7 @@ export async function getClicksByCode (code, after, limit = 20) {
         params.push(after);
     }
 
-    params.push(limit);
+    params.push(limit + 1);
 
     const limitIndex = params.length;
 

@@ -399,6 +399,14 @@ Generating CSV files seemed straightforward until real-world data was introduced
 
 **Solution:** Implemented a dedicated CSV escaping helper that wraps fields in quotes and doubles embedded quotes according to the CSV specification. This ensured exported files open correctly in spreadsheet applications and CSV parsers.
 
+### 6. Implementing Correct Keyset Pagination
+
+My first implementation of cursor pagination appeared to work but contained a subtle bug: the API always returned `next_cursor: null`, making records beyond the first page unreachable.
+
+**Solution:** Fetch `limit + 1` records instead of `limit`. The extra row acts as a sentinel that tells the API whether another page exists. If the extra row is present, the API returns only the first `limit` records and includes a `next_cursor`; otherwise it returns `next_cursor: null`.
+
+This taught me that implementing cursor pagination correctly involves more than replacing OFFSET with a cursor condition.
+
 ---
 
 ## 📚 What I Learned

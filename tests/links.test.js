@@ -191,3 +191,65 @@ test("sql injection attempt is harmless", async () => {
 after(async () => {
   await pool.end();
 });
+
+
+test("cursor pagination pages through all rows", async () => {
+    const createResponse = await request(app).post("/links").send({
+      target_url: "https://github.com",
+    });
+
+    const code = createResponse.body.code;
+
+    const redirects = Array.from(
+      { length: 25 },
+      () =>
+        request(app)
+          .get(`/${code}`)
+          .redirects(0),
+    );
+
+    await Promise.all(redirects);
+
+    const ids = [];
+
+    let cursor = null;
+
+    while (true) {
+      const queryString =
+        cursor
+          ? `?after=${cursor}&limit=7`
+          : "?limit=7";
+
+      const response =
+        await request(app)
+          .get(
+            `/links/${code}/clicks${queryString}`,
+          );
+
+      ids.push(
+        ...response.body.data.map(
+          (row) => row.id,
+        ),
+      );
+
+      if (
+        response.body.next_cursor ===
+        null
+      ) {
+        break;
+      }
+
+      cursor =
+        response.body.next_cursor;
+    }
+
+    assert.strictEqual(
+      ids.length,
+      25,
+    );
+
+    assert.strictEqual(
+      new Set(ids).size,
+      25,
+    );
+});
