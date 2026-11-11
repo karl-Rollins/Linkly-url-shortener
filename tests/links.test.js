@@ -186,6 +186,10 @@ test("sql injection attempt is harmless", async () => {
       response.status,
       400,
     );
+
+    const checkDb = await query("SELECT COUNT(*) FROM links;")
+
+    assert.ok(Number(checkDb.rows[0].count) >= 0)
 });
 
 after(async () => {
