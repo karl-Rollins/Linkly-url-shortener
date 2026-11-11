@@ -32,8 +32,6 @@ const errorHandler = (err, req, res, _next) => {
         })
     }
 
-    logger.err(err)
-
     return res.status(500).json({
         error: "Internal server error",
     })
