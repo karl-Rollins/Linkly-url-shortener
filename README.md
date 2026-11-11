@@ -8,13 +8,13 @@ A fully functional URL shortener built with **Node.js, Express 5, and PostgreSQL
 
 This project aims to:
 
-- Build a **REST API** with correct HTTP semantics (400/404/409/410/429)
+- Build a **REST API** with correct HTTP semantics (400/404/409/410)
 - Implement an **click counter**
 - Use **PostgreSQL** with real constraints (`UNIQUE`, `CHECK`, `FK ON DELETE CASCADE`)
 - Validate every input with **Zod**
 - Implement **pagination** with cursors for the click log
 - Test everything with **`node:test`** against a disposable test database
-- Document the API with **OpenAPI 3.0** + Swagger UI at `/docs`
+- Document the API with **OpenAPI 3.0** + Swagger UI at `/api-docs`
 
 ---
 
