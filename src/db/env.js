@@ -19,7 +19,7 @@ const envSchema = z.object({
     DB_NAME: z.string().min(1),
     DB_USER: z.string().min(1),
     DB_PASSWORD: z.string().min(1),
-    DB_SSL: z.string().transform(
+    DB_SSL: z.string().default("false").transform(
                         (value) =>
                         value === "true"
                       )
