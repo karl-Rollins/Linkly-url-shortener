@@ -407,6 +407,12 @@ My first implementation of cursor pagination appeared to work but contained a su
 
 This taught me that implementing cursor pagination correctly involves more than replacing OFFSET with a cursor condition.
 
+### 7. Verifying SQL Injection Resistance
+
+Initially I only tested that malicious inputs were rejected by validation. A review pointed out that this did not prove parameterized queries were safe.
+
+**Solution:** I added a regression test that sends a SQL-like payload through a field that reaches PostgreSQL, verifies it is stored verbatim, and confirms the database schema remains intact.
+
 ---
 
 ## 📚 What I Learned

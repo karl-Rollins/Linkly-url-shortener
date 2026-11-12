@@ -192,6 +192,62 @@ test("sql injection attempt is harmless", async () => {
     assert.ok(Number(checkDb.rows[0].count) >= 0)
 });
 
+test(
+  "sql injection payload is stored as data and does not affect the database",
+  async () => {
+    const createResponse =
+      await request(app)
+        .post("/links")
+        .send({
+          target_url:
+            "https://github.com",
+        });
+
+    const code =
+      createResponse.body.code;
+
+    const maliciousReferrer =
+      "'; DROP TABLE links; --";
+
+    await request(app)
+      .get(`/${code}`)
+      .set(
+        "Referer",
+        maliciousReferrer,
+      )
+      .redirects(0);
+
+    const clicksResponse =
+      await request(app)
+        .get(
+          `/links/${code}/clicks`,
+        );
+
+    assert.strictEqual(
+      clicksResponse.status,
+      200,
+    );
+
+    assert.strictEqual(
+      clicksResponse.body.data[0]
+        .referrer,
+      maliciousReferrer,
+    );
+
+    const tableCheck =
+      await query(
+        "SELECT COUNT(*) FROM links",
+      );
+
+    assert.ok(
+      Number(
+        tableCheck.rows[0].count,
+      ) > 0,
+    );
+  },
+);
+
+
 after(async () => {
   await pool.end();
 });
