@@ -3,14 +3,39 @@ function escapeCsv(value) {
     return "";
   }
 
-  return `"${String(value).replaceAll('"', '""')}"`;
+  let stringValue = String(value);
+
+  // Spreadsheet formula injection
+
+  if (/^[=+\-@]/.test(stringValue)) {
+    stringValue = `'${stringValue}`;
+  }
+
+  return `"${stringValue.replaceAll('"', '""')}"`;
 }
 
-export function clicksToCsv(clicks) {
-  const header =
-    "id,referrer,user_agent,clicked_at";
+// export function clicksToCsvRow(clicks) {
+//   const header =
+//     "id,referrer,user_agent,clicked_at";
 
-  const rows = clicks.map((click) =>
+//   const rows = clicks.map((click) =>
+//     [
+//       escapeCsv(click.id),
+//       escapeCsv(click.referrer),
+//       escapeCsv(click.user_agent),
+//       escapeCsv(
+//         click.clicked_at instanceof Date
+//           ? click.clicked_at.toISOString()
+//           : click.clicked_at,
+//       ),
+//     ].join(","),
+//   );
+
+//   return [header, ...rows].join("\n");
+// }
+
+export function clickToCsvRow(click) {
+  return (
     [
       escapeCsv(click.id),
       escapeCsv(click.referrer),
@@ -20,8 +45,6 @@ export function clicksToCsv(clicks) {
           ? click.clicked_at.toISOString()
           : click.clicked_at,
       ),
-    ].join(","),
+    ].join(",") + "\n"
   );
-
-  return [header, ...rows].join("\n");
 }

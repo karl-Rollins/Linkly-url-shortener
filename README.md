@@ -58,7 +58,7 @@ This project aims to:
 
 - `GET /links/:code/clicks.csv` streams the full log
 - `Content-Type: text/csv` + `Content-Disposition: attachment`
-- Exports click history as CSV.
+- Streams click history in batches rather than loading the entire dataset into memory. CSV values are escaped according to the CSV specification, and spreadsheet formula injection is neutralized by prefixing formula-like values before export.
 - Manual field escaping: quotes, commas, newlines handled
 
 ### 🗑️ Delete with Cascade

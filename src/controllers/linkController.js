@@ -7,9 +7,8 @@ import { deleteLink } from "../services/linkService.js";
 import { NotFoundError } from "../errors/NotFoundError.js";
 import { ValidationError } from "../errors/ValidationError.js";
 import { paginationSchema } from "../schemas/paginationSchema.js";
-import { getClicksForExport } from "../services/linkService.js";
 import { ZodError } from "zod";
-import { clicksToCsv } from "../utils/csvFormatter.js";
+import { clicksToCsvRow } from "../utils/csvFormatter.js";
 import { query } from "../db/query.js";
 
 export async function healthController(req,res,) {
@@ -143,16 +142,19 @@ export async function exportClicksController(req,res,next) {
   try {
     const { code } = req.params;
 
-    const clicks =
-      await getClicksForExport(code);
+    const batchSize = 1000
+    let cursor = null
 
-    if (clicks === null) {
-      throw new NotFoundError(
-        "Link not found",
-      );
-    }
+    // const clicks =
+    //   await getClicksForExport(code);
 
-    const csv =clicksToCsv(clicks);
+    // if (clicks === null) {
+    //   throw new NotFoundError(
+    //     "Link not found",
+    //   );
+    // }
+
+    // const csv =clicksToCsv(clicks);
 
     res.setHeader(
       "Content-Type",
@@ -164,7 +166,30 @@ export async function exportClicksController(req,res,next) {
       `attachment; filename="${code}-clicks.csv"`,
     );
 
-    return res.status(200).send(csv);
+    res.write("id,referrer,user_agent,clicked_at\n",)
+
+    while(true) {
+        const { data, next_cursor } = await getClicksByCode(code, cursor, batchSize)
+        if (data.length === 0) {
+            break
+        }
+
+        for (const click of data) {
+            const row  = clicksToCsvRow(click)
+
+            if (!res.write(row)) {
+                await new Promise ((resolve) => res.once("drain", resolve))
+            }
+        }
+
+        if (!next_cursor) {
+            break
+        }
+
+        cursor = next_cursor
+    }
+
+    res.end()
   } catch (error) {
     next(error);
   }
