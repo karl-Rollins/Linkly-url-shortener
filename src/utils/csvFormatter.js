@@ -34,7 +34,7 @@ function escapeCsv(value) {
 //   return [header, ...rows].join("\n");
 // }
 
-export function clickToCsvRow(click) {
+export function clicksToCsvRow(click) {
   return (
     [
       escapeCsv(click.id),
